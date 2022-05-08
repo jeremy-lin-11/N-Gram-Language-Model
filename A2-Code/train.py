@@ -5,6 +5,27 @@ class NGramLM(object):
     def __init__(self, n_grams=1):
         self.n_grams = n_grams
         self.unigram = Counter()
+        self.bigram = Counter()
+
+
+    def bigramExtract(self, data):
+        start_token = '<START>'
+        stop_token = '<STOP>'
+        for sentence in range(0, len(data)):
+            for word in range(0, len(data[sentence])):
+
+                # if we reached the last word
+                if word == len(data[sentence]) - 1:
+                    word1 = data[sentence][word]
+                    word2 = stop_token
+                    self.bigram[(word1, word2)] += 1
+                else:
+                    # P(W0, W1) -> tuple (W0, W1)
+                    word1 = data[sentence][word]
+                    word2 = data[sentence][word+1]
+                    self.bigram[(word1, word2)] += 1
+                    
+        print(self.bigram)
 
     def train(self, file_path, needs_preprocess=True):
 
@@ -41,5 +62,8 @@ class NGramLM(object):
                     self.unigram['<STOP>'] += 1
 
         print(self.unigram)
+
+        # BIGRAM EXTRACTION
+        self.bigramExtract(data)
 
         return 
