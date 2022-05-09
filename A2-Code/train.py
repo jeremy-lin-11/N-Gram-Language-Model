@@ -4,10 +4,12 @@ from collections import Counter, defaultdict
 class NGramLM(object):
     def __init__(self, n_grams=1):
         self.n_grams = n_grams
+        self.origtypes = Counter()
         self.unigram = Counter()
         self.bigram = Counter()
         self.trigram = Counter()
         self.stop_token = '<STOP>'
+        self.unk_token = '<UNK>'
 
     def trigramExtract(self, data):
         for sentence in range(0, len(data)):
@@ -58,7 +60,12 @@ class NGramLM(object):
             for sentence in range(0, len(data)):
                 # print(data[sentence])
                 data[sentence] = data[sentence].strip(' \n').split(' ') #BUG: empty new lines are being stored
-        
+                # print("data[sentence] =", data[sentence])
+                for word in data[sentence]:
+                    # print("self.origtypes =", self.origtypes)
+                    # print("data[sentence][word] =", data[sentence][word])
+                    self.origtypes[word] += 1
+        print(self.origtypes)                    
         print(data)
 
         #PREPROCESSING (OPTIONAL)
@@ -67,7 +74,10 @@ class NGramLM(object):
             with open("./data/processed.1b_benchmark.train.tokens", 'w') as file:
                 for sentence in range(0, len(data)):
                     for word in range(0, len(data[sentence])):
-                        file.write(data[sentence][word])
+                        if self.origtypes[data[sentence][word]] >= 3:
+                            file.write(data[sentence][word])
+                        else:
+                            file.write(self.unk_token)
                         if word != len(data[sentence]) - 1:
                             file.write(' ')
                         else:
@@ -81,6 +91,7 @@ class NGramLM(object):
         
         # UNIGRAM EXTRACTION
         self.unigramExtract(data)
+        print("unigram counter length = ", len(self.unigram))
 
         # BIGRAM EXTRACTION
         self.bigramExtract(data)
