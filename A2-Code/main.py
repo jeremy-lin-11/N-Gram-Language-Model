@@ -24,7 +24,7 @@ def main():
 
     print("Training uni-gram model")
     uni: NGramLM = NGramLM(n_grams=1)
-    uni.train(testing_file, needs_preprocess=True) # will pre-process training file -> preprocessed_train_file 
+    uni.train(train_file, needs_preprocess=True) # will pre-process training file -> preprocessed_train_file 
     # print("Uni-Gram train PP:", uni.perplexity(processed_train_file))
     # print("Uni-gram dev pp:", uni.perplexity(dev_file, unkify_OOV_words=True))
     # print("Uni-gram test pp:", uni.perplexity(test_file, unkify_OOV_words=True))

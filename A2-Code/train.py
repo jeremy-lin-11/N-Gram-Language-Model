@@ -55,7 +55,7 @@ class NGramLM(object):
     def train(self, file_path, needs_preprocess=True):
 
         #TOKENIZING
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             data = file.readlines()
             for sentence in range(0, len(data)):
                 # print(data[sentence])
@@ -71,7 +71,7 @@ class NGramLM(object):
         #PREPROCESSING (OPTIONAL)
         #need to unkify words (OOV if less than 3 counts)
         if(needs_preprocess):
-            with open("./data/processed.1b_benchmark.train.tokens", 'w') as file:
+            with open("./data/processed.1b_benchmark.train.tokens", 'w', encoding='utf-8') as file:
                 for sentence in range(0, len(data)):
                     for word in range(0, len(data[sentence])):
                         if self.origtypes[data[sentence][word]] >= 3:
