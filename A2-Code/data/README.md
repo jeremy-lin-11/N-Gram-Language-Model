@@ -1,4 +1,4 @@
-# CSE 143 (Winter 2020) HW 1 data
+# CSE 143 (Spring 2022) HW 2 data
 
 This folder contains 3 files, a subset of the 1 Billion Word Benchmark's
 heldout set.
