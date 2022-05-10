@@ -27,7 +27,7 @@ class NGramLM(object):
                     word3 = data[sentence][word + 2]
                     self.trigram[(word1, word2, word3)] += 1
 
-        print(self.trigram)
+        # print(self.trigram)
 
     def bigramExtract(self, data):
         for sentence in range(0, len(data)):
@@ -42,7 +42,7 @@ class NGramLM(object):
                     word1 = data[sentence][word]
                     word2 = data[sentence][word+1]
                     self.bigram[(word1, word2)] += 1
-        print(self.bigram)
+        # print(self.bigram)
 
     def unigramExtract(self, data):
         for sentence in range(0, len(data)):
@@ -50,7 +50,7 @@ class NGramLM(object):
                 self.unigram[data[sentence][word].lower()] += 1
                 if word == len(data[sentence]) - 1:
                     self.unigram[self.stop_token] += 1
-        print(self.unigram)
+        # print(self.unigram)
 
     def train(self, file_path, needs_preprocess=True):
 
@@ -58,15 +58,15 @@ class NGramLM(object):
         with open(file_path, 'r', encoding='utf-8') as file:
             data = file.readlines()
             for sentence in range(0, len(data)):
-                # print(data[sentence])
-                data[sentence] = data[sentence].strip(' \n').split(' ') #BUG: empty new lines are being stored
+                data[sentence] = data[sentence].strip(' \n').split(' ') 
                 # print("data[sentence] =", data[sentence])
                 for word in data[sentence]:
                     # print("self.origtypes =", self.origtypes)
                     # print("data[sentence][word] =", data[sentence][word])
                     self.origtypes[word] += 1
-        print(self.origtypes)                    
-        print(data)
+        # print(self.origtypes)
+        data = list(filter((['']).__ne__, data))    #fixes empty new lines being stored         
+        # print(data)
 
         #PREPROCESSING (OPTIONAL)
         #need to unkify words (OOV if less than 3 counts)
@@ -74,6 +74,7 @@ class NGramLM(object):
             with open("./data/processed.1b_benchmark.train.tokens", 'w', encoding='utf-8') as file:
                 for sentence in range(0, len(data)):
                     for word in range(0, len(data[sentence])):
+                        # print("origtypes for word '", data[sentence][word], "' is", self.origtypes[data[sentence][word]])
                         if self.origtypes[data[sentence][word]] >= 3:
                             file.write(data[sentence][word])
                         else:
@@ -82,21 +83,33 @@ class NGramLM(object):
                             file.write(' ')
                         else:
                             file.write('\n')
-        
+
+            with open("./data/processed.1b_benchmark.train.tokens", 'r', encoding='utf-8') as file:
+                processedData = file.readlines()
+                for sentence in range(0, len(processedData)):
+                    processedData[sentence] = processedData[sentence].strip(' \n').split(' ')
+            data = processedData
+        print(data)
         # print("done and n_grams is:", self.n_grams)
 
         #TRACK COUNTS/PROBABILITIES 
         #use counter dictionary, ngram key, count value
-        # how to adjust for ngrams? since key goes from 'Xi' to 'Xi-1 Xi' to 'Xi-2 Xi-1 Xi'
-        
+
         # UNIGRAM EXTRACTION
-        self.unigramExtract(data)
-        print("unigram counter length = ", len(self.unigram))
+        if (self.n_grams == 1):
+            self.unigramExtract(data)
+            print("unigram counter length = ", len(self.unigram))
+            print(self.unigram)
 
         # BIGRAM EXTRACTION
-        self.bigramExtract(data)
+        elif (self.n_grams == 2):
+            self.unigramExtract(data)
+            self.bigramExtract(data)
 
         # TRIGRAM EXTRACTION
-        self.trigramExtract(data)
-
+        elif (self.n_grams == 3):
+            self.unigramExtract(data)
+            self.bigramExtract(data)
+            self.trigramExtract(data)
+            
         return 
