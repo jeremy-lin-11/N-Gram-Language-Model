@@ -11,7 +11,6 @@ from concurrent.futures import process
 from typing import Counter
 # from perplexity import *
 from train import *
-import numpy as np
 import collections as cl
 
 
@@ -25,23 +24,26 @@ def main():
     sample: str = "./data/sample.tokens"
 
 
-    print("Training uni-gram model")
-    uni: NGramLM = NGramLM(n_grams=1)
-    uni.train(train_file, needs_preprocess=True) # will pre-process training file -> preprocessed_train_file 
-    print("Uni-Gram train PP:", uni.perplexity(processed_train_file))
-    print("Uni-gram dev pp:", uni.perplexity(dev_file))
-    print("Uni-gram test pp:", uni.perplexity(test_file))
+    # print("Training uni-gram model")
+    # uni: NGramLM = NGramLM(n_grams=1)
+    # uni.train(train_file, needs_preprocess=True) # will pre-process training file -> preprocessed_train_file 
+    # print("Uni-Gram HDTV PP:", uni.perplexity(testing_file))
+    # print("Uni-Gram train PP:", uni.perplexity(processed_train_file))
+    # print("Uni-gram dev pp:", uni.perplexity(dev_file))
+    # print("Uni-gram test pp:", uni.perplexity(test_file))
 
     # print("Training bi-gram model")
     # bi: NGramLM = NGramLM(n_grams=2)
-    # bi.train(testing_file, needs_preprocess=False)
+    # bi.train(train_file, needs_preprocess=False)
+    # print("Bi-Gram HDTV PP:", bi.perplexity(testing_file))
     # print("Bi-Gram train PP:", bi.perplexity(processed_train_file))
     # print("Bi-gram dev pp:", bi.perplexity(dev_file, unkify_OOV_words=True))
     # print("Bi-gram test pp:", bi.perplexity(test_file, unkify_OOV_words=True))
 
-    # print("Training tri-gram model")
-    # tri: NGramLM = NGramLM(n_grams=3)
-    # tri.train(processed_train_file, needs_preprocess=False)
+    print("Training tri-gram model")
+    tri: NGramLM = NGramLM(n_grams=3)
+    tri.train(train_file, needs_preprocess=False)
+    print("Tri-Gram HDTV PP:", tri.perplexity(testing_file))
     # print("Tri-Gram train PP:", tri.perplexity(processed_train_file))
     # print("Tri-gram dev pp:", tri.perplexity(dev_file, unkify_OOV_words=True))
     # # print("Tri-gram test pp:", tri.perplexity(test_file, unkify_OOV_words=True))
