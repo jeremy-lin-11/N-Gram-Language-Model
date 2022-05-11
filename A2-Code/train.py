@@ -15,19 +15,31 @@ class NGramLM(object):
     def trigramExtract(self, data):
         for sentence in range(0, len(data)):
             for word in range(0, len(data[sentence])):
-                # if we are at start
+                # first word, two starts
                 if word == 0 and len(data[sentence]) != 1:
-                    currWord = data[sentence][word + 1]
-                    prevWord1 = data[sentence][word]
-                    prevWord2 = '<START>'
+                    currWord = data[sentence][word]
+                    prevWord1 = '<START>'
+                    prevWord2 = '<PRESTART>'
                     # print('index', word, 'gives', '1')
                     self.trigram[(prevWord2, prevWord1, currWord)] += 1
-                elif word == 0 and len(data[sentence]) == 1:
-                    currWord = self.stop_token
+
+                    currWord = data[sentence][word+1]
                     prevWord1 = data[sentence][word]
                     prevWord2 = '<START>'
-                    # print('index', word, 'gives', '2')
                     self.trigram[(prevWord2, prevWord1, currWord)] += 1
+                    # print('index', word, 'gives', '2')
+                elif word == 0 and len(data[sentence]) == 1:
+                    currWord = data[sentence][word]
+                    prevWord1 = '<START>'
+                    prevWord2 = '<PRESTART>'
+                    # print('index', word, 'gives', '1')
+                    self.trigram[(prevWord2, prevWord1, currWord)] += 1
+
+                    currWord = '<STOP>'
+                    prevWord1 = data[sentence][word]
+                    prevWord2 = '<START>'
+                    self.trigram[(prevWord2, prevWord1, currWord)] += 1
+                    # print('index', word, 'gives', '2')
                 # if we reached the last word
                 elif word == len(data[sentence]) - 1 and len(data[sentence]) != 1:
                     prevWord2 = data[sentence][word-1]
@@ -119,7 +131,7 @@ class NGramLM(object):
         # UNIGRAM EXTRACTION
         if (self.n_grams == 1):
             self.unigramExtract(data)
-            print("unigram counter length = ", len(self.unigram))
+            # print("unigram counter length = ", len(self.unigram))
             # print(self.unigram)
 
         # BIGRAM EXTRACTION
@@ -127,7 +139,7 @@ class NGramLM(object):
             self.unigramExtract(data)
             self.bigramExtract(data)
             # print("unigram counter length = ", len(self.unigram))
-            print("bigram counter length = ", len(self.bigram))
+            # print("bigram counter length = ", len(self.bigram))
             # print('unigram', self.unigram)
             # print('bigram', self.bigram)
 
@@ -139,6 +151,8 @@ class NGramLM(object):
             # print("unigram counter length = ", len(self.unigram))
             # print("bigram counter length = ", len(self.bigram))
             # print("trigram counter length = ", len(self.trigram))
+            # print('unigram', self.unigram)
+            # print('bigram', self.bigram)
             # print('trigram', self.trigram)
             
         return 
@@ -181,14 +195,14 @@ class NGramLM(object):
                 prSentence = 0
                 for word in range(0,len(testingData[sentence])):
                     if self.unigram[testingData[sentence][word]] == 0:
-                        prSentence += np.log2(self.unigram[self.unk_token]) - np.log2(unigramSize)
+                        prSentence += np.log2(self.unigram['<UNK>']) - np.log2(unigramSize)
                         # print('word pr' , self.unigram[self.unk_token] / unigramSize)
                         # print('sentence pr', prSentence)
                     else:
                         prSentence += np.log2(self.unigram[testingData[sentence][word]]) -  np.log2(unigramSize)
                         # print('word pr' , self.unigram[testingData[sentence][word]] / unigramSize)
                         # print('sentence pr', prSentence)
-                prSentence += np.log2(self.unigram[self.stop_token]) - np.log2(unigramSize)
+                prSentence += np.log2(self.unigram['<STOP>']) - np.log2(unigramSize)
                 
                 # print('word pr' , self.unigram[self.stop_token] / unigramSize)
                 # print('sentence pr', prSentence)
@@ -212,15 +226,24 @@ class NGramLM(object):
                 prSentence = 0
                 for word in range(0,len(testingData[sentence])):
                     if word == 0:
-                        currWord = self.unk_token if self.unigram[testingData[sentence][word]] == 0 else testingData[sentence][word]
-                        prSentence += np.log2(self.bigram[('<START>', currWord)]) - np.log2(self.unigram[self.stop_token])
+                        if self.unigram[testingData[sentence][word]] == 0:
+                            continue
+                        currWord = testingData[sentence][word]
+                        if self.bigram[('<START>', currWord)] != 0:
+                            prSentence += np.log2(self.bigram[('<START>', currWord)]) - np.log2(self.unigram[self.stop_token])
                     if word == len(testingData[sentence]) - 1:
-                        prevWord = self.unk_token if self.unigram[testingData[sentence][word]] == 0 else testingData[sentence][word]
-                        prSentence += np.log2(self.bigram[(prevWord, '<STOP>')]) - np.log2(self.unigram[prevWord])
+                        if self.unigram[testingData[sentence][word]] == 0:
+                            continue
+                        prevWord = testingData[sentence][word]
+                        if self.bigram[(prevWord, '<STOP>')] != 0:
+                            prSentence += np.log2(self.bigram[(prevWord, '<STOP>')]) - np.log2(self.unigram[prevWord])
                     else:
-                        currWord = self.unk_token if self.unigram[testingData[sentence][word+1]] == 0 else testingData[sentence][word+1]
-                        prevWord = self.unk_token if self.unigram[testingData[sentence][word]] == 0 else testingData[sentence][word]
-                        prSentence += np.log2(self.bigram[(prevWord, currWord)]) - np.log2(self.unigram[prevWord])         
+                        if self.unigram[testingData[sentence][word]] == 0:
+                            continue
+                        currWord = testingData[sentence][word+1]
+                        prevWord = testingData[sentence][word]
+                        if self.bigram[(prevWord, currWord)] != 0 and self.unigram[prevWord] != 0:
+                            prSentence += np.log2(self.bigram[(prevWord, currWord)]) - np.log2(self.unigram[prevWord])         
 
                 prSum += prSentence
 
@@ -237,34 +260,93 @@ class NGramLM(object):
             testTotalTokens=0
             for sentence in range(0,len(testingData)):
                 testTotalTokens += len(testingData[sentence]) + 1
+                if len(testingData[sentence]) <= 1:
+                    print(sentence)
                 #calculate pr of each word
                 prSentence = 0
                 for word in range(0,len(testingData[sentence])):
-                    if word == 0:
-                        currWord = self.unk_token if self.unigram[testingData[sentence][word+1]] == 0 else testingData[sentence][word+1]
-                        prevWord1 = self.unk_token if self.unigram[testingData[sentence][word]] == 0 else testingData[sentence][word]
-                        # prevWord2 = '<START>'
-                        print('word at index ', word, 'is: ', testingData[sentence][word])
-                        print('word at index 1 + ', word, 'is: ', testingData[sentence][word+1])
-                        print('currWord is: ', currWord, 'prevWord1 is: ', prevWord1, 'prevWord2 is: ', '<START>')
-                        prSentence += np.log2(self.trigram[('<START>', prevWord1, currWord)]) - np.log2(self.bigram[('<START>', prevWord1)])
+                    if word == 0 and len(testingData[sentence]) != 1:
+                        if self.unigram[testingData[sentence][word]] == 0:
+                            continue
+                        currWord = testingData[sentence][word]
+                        prevWord1 = '<START>'
+                        prevWord2 = '<PRESTART>'
+                        # print('prevWord1: word at index ', word, 'is: ', testingData[sentence][word])
+                        # print('currWord: word at index ', word, '+ 1 is: ', testingData[sentence][word+1])
+                        # print('currWord is: ', currWord, 'prevWord1 is: ', '<START>', 'prevWord2 is: ', '<PRESTART>')
+                        # print('trigram count', self.trigram[('<PRESTART>', '<START>', currWord)])
+                        # print('bigram count', self.bigram[('<START>', currWord)])
+                        if self.trigram[('<PRESTART>', '<START>', currWord)] != 0 and self.bigram[('<START>', currWord)] != 0:
+                            prSentence += np.log2(self.trigram[('<PRESTART>', '<START>', currWord)]) - np.log2(self.bigram[('<START>', currWord)])
+
+                        if self.unigram[testingData[sentence][word+1]] == 0:
+                            continue
+                        currWord = testingData[sentence][word+1]
+                        prevWord1 = testingData[sentence][word]
+                        prevWord2 = '<START>'
+                        # print('prevWord1: word at index ', word, 'is: ', testingData[sentence][word])
+                        # print('currWord: word at index ', word, '+ 1 is: ', testingData[sentence][word+1])
+                        # print('currWord is: ', currWord, 'prevWord1 is: ', prevWord1, 'prevWord2 is: ', '<START>')
+                        # print('trigram count', self.trigram[('<START>', prevWord1, currWord)])
+                        # print('bigram count', self.bigram[('<START>', prevWord1)])
+                        if self.trigram[('<START>', prevWord1, currWord)] != 0 and self.bigram[('<START>', prevWord1)] != 0:
+                            prSentence += np.log2(self.trigram[('<START>', prevWord1, currWord)]) - np.log2(self.bigram[('<START>', prevWord1)])
+
+
+                    elif word == 0 and len(testingData[sentence]) == 1:
+                        if self.unigram[testingData[sentence][word]] == 0:
+                            continue
+                        currWord = testingData[sentence][word]
+                        prevWord1 = '<START>'
+                        prevWord2 = '<PRESTART>'
+                        # print('prevWord1: word at index ', word, 'is: ', testingData[sentence][word])
+                        # print('currWord: word at index ', word, '+ 1 is: ', testingData[sentence][word+1])
+                        # print('currWord is: ', currWord, 'prevWord1 is: ', '<START>', 'prevWord2 is: ', '<PRESTART>')
+                        # print('trigram count', self.trigram[('<PRESTART>', '<START>', currWord)])
+                        # print('bigram count', self.bigram[('<START>', currWord)])
+                        if self.trigram[('<PRESTART>', '<START>', currWord)] != 0 and self.bigram[('<START>', currWord)] != 0:
+                            prSentence += np.log2(self.trigram[('<PRESTART>', '<START>', currWord)]) - np.log2(self.bigram[('<START>', currWord)])
+
+                        if self.unigram[testingData[sentence][word+1]] == 0:
+                            continue
+                        currWord = '<STOP>'
+                        prevWord1 = testingData[sentence][word]
+                        prevWord2 = '<START>'
+                        # print('prevWord1: word at index ', word, 'is: ', testingData[sentence][word])
+                        # print('currWord: word at index ', word, '+ 1 is: ', testingData[sentence][word+1])
+                        # print('currWord is: ', currWord, 'prevWord1 is: ', prevWord1, 'prevWord2 is: ', '<START>')
+                        # print('trigram count', self.trigram[('<START>', prevWord1, currWord)])
+                        # print('bigram count', self.bigram[('<START>', prevWord1)])
+                        if self.trigram[('<START>', prevWord1, currWord)] != 0 and self.bigram[('<START>', prevWord1)] != 0:
+                            prSentence += np.log2(self.trigram[('<START>', prevWord1, currWord)]) - np.log2(self.bigram[('<START>', prevWord1)])
+                            
                     elif word == len(testingData[sentence]) - 1:
                         # currWord = self.stop_token
-                        prevWord1 = self.unk_token if self.unigram[testingData[sentence][word]] == 0 else testingData[sentence][word]
-                        prevWord2 = self.unk_token if self.unigram[testingData[sentence][word-1]] == 0 else testingData[sentence][word-1]
-                        print('word at index ', word, 'is: ', testingData[sentence][word])
-                        print('word at index -1 + ', word, 'is: ', testingData[sentence][word-1])
-                        print('currWord is: ', '<STOP>', 'prevWord1 is: ', prevWord1, 'prevWord2 is: ', prevWord2)
-                        prSentence += np.log2(self.trigram[(prevWord2, prevWord1, '<STOP>')]) - np.log2(self.bigram[(prevWord2, prevWord1)])
+                        if self.unigram[testingData[sentence][word]] == 0 or self.unigram[testingData[sentence][word-1]] == 0:
+                            continue
+                        prevWord1 = testingData[sentence][word]
+                        prevWord2 = testingData[sentence][word-1]
+                        # print('prevWord1: word at index ', word, 'is: ', testingData[sentence][word])
+                        # print('prevWord2: word at index ', word, '- 1 is: ', testingData[sentence][word-1])
+                        # print('currWord is: ', '<STOP>', 'prevWord1 is: ', prevWord1, 'prevWord2 is: ', prevWord2)
+                        # print('trigram count', self.trigram[(prevWord2, prevWord1, '<STOP>')])
+                        # print('bigram count', self.bigram[(prevWord2, prevWord1)])
+                        if self.trigram[(prevWord2, prevWord1, '<STOP>')] != 0 and self.bigram[(prevWord2, prevWord1)] != 0:
+                            prSentence += np.log2(self.trigram[(prevWord2, prevWord1, '<STOP>')]) - np.log2(self.bigram[(prevWord2, prevWord1)])
                     else:
-                        currWord = self.unk_token if self.unigram[testingData[sentence][word+1]] == 0 else testingData[sentence][word+1]
-                        prevWord1 = self.unk_token if self.unigram[testingData[sentence][word]] == 0 else testingData[sentence][word]
-                        prevWord2 = self.unk_token if self.unigram[testingData[sentence][word-1]] == 0 else testingData[sentence][word-1]
-                        print('word at index -1 + ', word, 'is: ', testingData[sentence][word-1])
-                        print('word at index ', word, 'is: ', testingData[sentence][word])
-                        print('word at index 1 + ', word, 'is: ', testingData[sentence][word+1])
-                        print('currWord is: ', currWord, 'prevWord1 is: ', prevWord1, 'prevWord2 is: ', prevWord2)
-                        prSentence += np.log2(self.trigram[(prevWord2, prevWord1, currWord)]) - np.log2(self.bigram[(prevWord2, prevWord1)])        
+                        if self.unigram[testingData[sentence][word+1]] == 0 or self.unigram[testingData[sentence][word]] == 0 or self.unigram[testingData[sentence][word-1]] == 0:
+                            continue
+                        currWord = testingData[sentence][word+1]
+                        prevWord1 = testingData[sentence][word]
+                        prevWord2 = testingData[sentence][word-1]
+                        # print('prevWord2: word at index ', word, '- 1 is: ', testingData[sentence][word-1])
+                        # print('prevWord1: word at index ', word, 'is: ', testingData[sentence][word])
+                        # print('currWord: word at index ', word, '+ 1 is: ', testingData[sentence][word+1])
+                        # print('currWord is: ', currWord, 'prevWord1 is: ', prevWord1, 'prevWord2 is: ', prevWord2)
+                        # print('trigram count', self.trigram[(prevWord2, prevWord1, currWord)])
+                        # print('bigram count', self.bigram[(prevWord2, prevWord1)])
+                        if self.trigram[(prevWord2, prevWord1, currWord)] != 0 and self.bigram[(prevWord2, prevWord1)] != 0:
+                            prSentence += np.log2(self.trigram[(prevWord2, prevWord1, currWord)]) - np.log2(self.bigram[(prevWord2, prevWord1)])        
 
                 prSum += prSentence
 
