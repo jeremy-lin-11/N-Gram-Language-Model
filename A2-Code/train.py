@@ -110,7 +110,7 @@ class NGramLM(object):
                         if self.origtypes[data[sentence][word]] >= 3:
                             file.write(data[sentence][word])
                         else:
-                            file.write(self.unk_token)
+                            file.write('<UNK>')
 
                         if word != len(data[sentence]) - 1:
                             file.write(' ')
@@ -186,7 +186,7 @@ class NGramLM(object):
             unigramSize = self.unigram.total() #sum of tokens in vocabulary
             testTotalTokens=0 #total tokens in all sentences
             # print("unigramSize=", unigramSize)
-
+            # print(self.unigram['<UNK>'])
 
             #for each sentence
             for sentence in range(0,len(testingData)):
@@ -218,6 +218,7 @@ class NGramLM(object):
 
         #BIGRAM PERPLEXITY
         elif self.n_grams == 2:
+            # print(self.unigram['<UNK>'])
             prSum = 0
             testTotalTokens=0
             for sentence in range(0,len(testingData)):
@@ -227,7 +228,8 @@ class NGramLM(object):
                 for word in range(0,len(testingData[sentence])):
                     if word == 0:
                         if self.unigram[testingData[sentence][word]] == 0:
-                            currWord = '<UNK>'
+                            # currWord = '<UNK>'
+                            continue
                         else:
                             currWord = testingData[sentence][word]
 
@@ -236,18 +238,21 @@ class NGramLM(object):
 
                     if word == len(testingData[sentence]) - 1:
                         if self.unigram[testingData[sentence][word]] == 0:
-                            prevWord = '<UNK>'
+                            # prevWord = '<UNK>'
+                            continue
                         else:
                             prevWord = testingData[sentence][word]
                         if self.bigram[(prevWord, '<STOP>')] != 0 and self.unigram[prevWord] != 0:
                             prSentence += np.log2(self.bigram[(prevWord, '<STOP>')]) - np.log2(self.unigram[prevWord])
                     else:
                         if self.unigram[testingData[sentence][word+1]] == 0:
-                            currWord = '<UNK>'
+                            # currWord = '<UNK>'
+                            continue
                         else:
                             currWord = testingData[sentence][word+1]
                         if self.unigram[testingData[sentence][word]] == 0:
-                            prevWord = '<UNK>'
+                            # prevWord = '<UNK>'
+                            continue
                         else:
                             prevWord = testingData[sentence][word]
                         
@@ -265,6 +270,7 @@ class NGramLM(object):
         
         #TRIGRAM PERPLEXITY
         elif self.n_grams == 3:
+            # print(self.unigram['<UNK>'])
             prSum = 0
             testTotalTokens=0
             for sentence in range(0,len(testingData)):
@@ -276,7 +282,8 @@ class NGramLM(object):
                 for word in range(0,len(testingData[sentence])):
                     if word == 0 and len(testingData[sentence]) != 1:
                         if self.unigram[testingData[sentence][word]] == 0:
-                            currWord = '<UNK>'
+                            # currWord = '<UNK>'
+                            continue
                         else: currWord = testingData[sentence][word]
                         prevWord1 = '<START>'
                         prevWord2 = '<PRESTART>'
@@ -290,10 +297,12 @@ class NGramLM(object):
                             prSentence += np.log2(self.trigram[('<PRESTART>', '<START>', currWord)]) - np.log2(self.unigram['<STOP>'])
 
                         if self.unigram[testingData[sentence][word+1]] == 0:
-                            currWord = '<UNK>'
+                            # currWord = '<UNK>'
+                            continue
                         else: currWord = testingData[sentence][word+1]
                         if self.unigram[testingData[sentence][word]] == 0:
-                            prevWord1 = '<UNK>'
+                            # prevWord1 = '<UNK>'
+                            continue
                         else: prevWord1 = testingData[sentence][word]
                         prevWord2 = '<START>'
                         # print('prevWord1: word at index ', word, 'is: ', testingData[sentence][word])
@@ -319,7 +328,8 @@ class NGramLM(object):
                             prSentence += np.log2(self.trigram[('<PRESTART>', '<START>', currWord)]) - np.log2(self.bigram[('<START>', currWord)])
 
                         if self.unigram[testingData[sentence][word]] == 0:
-                            prevWord1 = '<UNK>'
+                            # prevWord1 = '<UNK>'
+                            continue
                         else: prevWord1 = testingData[sentence][word]
                         currWord = '<STOP>'
                         prevWord2 = '<START>'
@@ -334,10 +344,12 @@ class NGramLM(object):
                     elif word == len(testingData[sentence]) - 1:
                         # currWord = self.stop_token
                         if self.unigram[testingData[sentence][word]] == 0:
-                            prevWord1 = '<UNK>'
+                            # prevWord1 = '<UNK>'
+                            continue
                         else: prevWord1 = testingData[sentence][word]
                         if self.unigram[testingData[sentence][word-1]] == 0:
-                            prevWord2 = '<UNK>'
+                            # prevWord2 = '<UNK>'
+                            continue
                         else: prevWord2 = testingData[sentence][word-1]
                         # print('prevWord1: word at index ', word, 'is: ', testingData[sentence][word])
                         # print('prevWord2: word at index ', word, '- 1 is: ', testingData[sentence][word-1])
@@ -348,15 +360,18 @@ class NGramLM(object):
                             prSentence += np.log2(self.trigram[(prevWord2, prevWord1, '<STOP>')]) - np.log2(self.bigram[(prevWord2, prevWord1)])
                     else:
                         if self.unigram[testingData[sentence][word+1]] == 0:
-                            currWord = '<UNK>'
+                            # currWord = '<UNK>'
+                            continue
                         else: currWord = testingData[sentence][word+1]
 
                         if self.unigram[testingData[sentence][word]] == 0:
-                            prevWord1 = '<UNK>'
+                            # prevWord1 = '<UNK>'
+                            continue
                         else:  prevWord1 = testingData[sentence][word]
-                        
+
                         if self.unigram[testingData[sentence][word-1]] == 0:
-                            prevWord2 = '<UNK>'
+                            # prevWord2 = '<UNK>'
+                            continue
                         else: prevWord2 = testingData[sentence][word-1]
                         
                         # print('prevWord2: word at index ', word, '- 1 is: ', testingData[sentence][word-1])

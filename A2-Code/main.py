@@ -31,7 +31,7 @@ def main():
 
     print("Training bi-gram model")
     bi: NGramLM = NGramLM(n_grams=2)
-    bi.train(train_file, needs_preprocess=False)
+    bi.train(processed_train_file, needs_preprocess=False)
     print("Bi-Gram HDTV PP:", bi.perplexity(testing_file))
     print("Bi-Gram train PP:", bi.perplexity(processed_train_file))
     print("Bi-gram dev pp:", bi.perplexity(dev_file))
@@ -39,7 +39,7 @@ def main():
 
     print("Training tri-gram model")
     tri: NGramLM = NGramLM(n_grams=3)
-    tri.train(train_file, needs_preprocess=False)
+    tri.train(processed_train_file, needs_preprocess=False)
     print("Tri-Gram HDTV PP:", tri.perplexity(testing_file))
     print("Tri-Gram train PP:", tri.perplexity(processed_train_file))
     print("Tri-gram dev pp:", tri.perplexity(dev_file))
