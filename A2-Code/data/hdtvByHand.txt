@@ -1,0 +1,19 @@
+HDTV .
+
+
+
+<START> <START> HDTV . <STOP>
+
+Trigrams                  Counts in processed training        Bigram Denominator for MLE     Counts in processed training 
+
+<START> <START> HDTV            1                           <START> HDTV                     1
+<START>  HDTV    .              1                           <START> HDTV                     1
+  HDTV     .   <STOP>           1                            HDTV    .                       1
+
+
+pr(HDTV .)       = 1/1 * 1/1 * 1/1 = 1
+log2 pr(HDTV .)  = log2(1/1) + log2(1/1) + log2(1/1) = 0
+
+avg log2 pr(HDTV .) = 1/3 * 0 = 0
+
+perplexity = 2^-0 = 1
