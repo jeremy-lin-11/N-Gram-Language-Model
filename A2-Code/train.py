@@ -276,8 +276,9 @@ class NGramLM(object):
                         # print('currWord is: ', currWord, 'prevWord1 is: ', '<START>', 'prevWord2 is: ', '<PRESTART>')
                         # print('trigram count', self.trigram[('<PRESTART>', '<START>', currWord)])
                         # print('bigram count', self.bigram[('<START>', currWord)])
-                        if self.trigram[('<PRESTART>', '<START>', currWord)] != 0 and self.bigram[('<START>', currWord)] != 0:
-                            prSentence += np.log2(self.trigram[('<PRESTART>', '<START>', currWord)]) - np.log2(self.bigram[('<START>', currWord)])
+                        if self.trigram[('<PRESTART>', '<START>', currWord)] != 0:
+                            # bigram denominator for first start token is start start, equiv to # of stop tokens
+                            prSentence += np.log2(self.trigram[('<PRESTART>', '<START>', currWord)]) - np.log2(self.unigram['<STOP>'])
 
                         if self.unigram[testingData[sentence][word+1]] == 0:
                             continue
