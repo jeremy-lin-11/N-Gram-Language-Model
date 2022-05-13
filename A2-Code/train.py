@@ -315,7 +315,9 @@ class NGramLM(object):
 
 
                     elif word == 0 and len(testingData[sentence]) == 1:
-                        if self.unigram[testingData[sentence][word]] == 0: currWord = '<UNK>'
+                        if self.unigram[testingData[sentence][word]] == 0: 
+                            # currWord = '<UNK>'
+                            continue
                         else: currWord = testingData[sentence][word]
                         prevWord1 = '<START>'
                         prevWord2 = '<PRESTART>'
