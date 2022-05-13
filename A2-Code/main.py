@@ -45,6 +45,10 @@ def main():
     print("Tri-gram dev pp:", tri.perplexity(dev_file))
     print("Tri-gram test pp:", tri.perplexity(test_file))
 
+    # print("TEST: Training model")
+    # test: NGramLM = NGramLM(n_grams=3)
+    # test.train(testing_file, needs_preprocess=False) # will pre-process training file -> preprocessed_train_file 
+
 if __name__ == "__main__":
     main()
 
