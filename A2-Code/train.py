@@ -341,7 +341,7 @@ class NGramLM(object):
 
     # this thing should take the ngram model we made from train and use those counts in calculating the MLE for test/dev sets
     # tokenize test set, counts and all that of ngrams, use perplexity
-    def perplexity(self, file_path):
+    def perplexity(self, file_path, in_alpha=0):
         #TOKENIZING
         with open(file_path, 'r', encoding='utf-8') as file:
             testingData = file.readlines()
@@ -356,7 +356,7 @@ class NGramLM(object):
         testingData = list(filter((['']).__ne__, testingData))    #fixes empty new lines being stored         
         # print(testingData)
         
-        alpha = 0
+        alpha = in_alpha
         vocabSize = len(self.unigram)
         
 
